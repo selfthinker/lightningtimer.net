@@ -1,0 +1,101 @@
+@(event:Event, eventSession: Session, token: String)
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Welcome to event @event.id</title>
+        <script type="text/javascript" src="/_ah/channel/jsapi"></script>
+        <script type="text/javascript" src="/static/js/jquery-1.7.2.min.js"></script>
+        <script type="text/javascript" src="/static/js/json2.js"></script>
+        <script>
+            // Default settings: 5 minutes, warning at 1 minute
+            var count = 5 * 60;
+            var warning = 60;
+            var timeout = null;
+
+            $(function() {
+                channel = new goog.appengine.Channel('@token');
+                socket = channel.open();
+                socket.onopen = function() {console.log("onOpen")};
+                socket.onmessage = function(msg) {
+                    console.log(msg.data);
+                    data = JSON.parse(msg.data);
+                    console.log(data);
+                    window.clearTimeout(timeout);
+                    if (data.state == "start") {
+                        count = data.count;
+                        warning = data.warning;
+                        countdown();
+                    }
+                    if (data.state == "reset") {
+                        count = data.count;
+                        warning = data.warning;
+                        var obj = document.getElementById("countdown");
+                        obj.replaceChild(
+                                document.createTextNode("Ready"),
+                                obj.firstChild
+                        );
+                        document.body.className = 'start';
+
+                    }
+                };
+                socket.onerror = function() {console.log("onError")};
+                socket.onclose = function() {console.log("onClose")};
+            });
+
+            function countdown() {
+                if (count > 0) {
+                    document.getElementById('countdown').style.cursor = '';
+                    var obj = document.getElementById("countdown");
+                    obj.replaceChild(
+                            document.createTextNode(count.toMinutesAndSeconds()),
+                            obj.firstChild
+                    );
+                    document.title = count.toMinutesAndSeconds();
+                    count--;
+                    if (count < warning) {
+                        document.body.className = 'warning';
+                    }
+                    timeout = window.setTimeout(countdown, 1000);
+                } else {
+                    document.body.className = 'deadline';
+                    var obj = document.getElementById("countdown");
+                    obj.replaceChild(
+                            document.createTextNode(count.toMinutesAndSeconds()),
+                            obj.firstChild
+                    );
+                    document.title = count.toMinutesAndSeconds();
+                }
+            }
+            Number.prototype.toMinutesAndSeconds = function() {
+                // convert numeric seconds input to minutes and seconds string output
+                var nn, curTime = new Date(this * 1000);
+                return nn = curTime.getMinutes() + ":" + (
+                        ((nn = curTime.getSeconds()) < 10) ? "0" + nn : nn
+                        );
+            }
+
+        </script>
+        <style type="text/css">
+            body {
+                text-align: center;
+                font-family: verdana;
+                font-weight: bold;
+                font-size: 20em;
+                color: white;
+                background-color: black;
+            }
+            body.warning {
+                background-color: pink;
+                color: black;
+            }
+            body.deadline {
+                text-decoration: blink;
+                background-color: red;
+                color: white;
+            }
+        </style>
+            </head>
+	<body>
+        <span id="countdown">Start</span>
+    </body>
+</html>

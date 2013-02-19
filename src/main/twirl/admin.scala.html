@@ -1,0 +1,34 @@
+@(event: Event, count: Int, warning: Int)
+<html>
+<head>
+    <title>Admin for event @event.id</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/bootstrap-responsive.min.css">
+</head>
+<body>
+<div class="container">
+<h1>Start</h1>
+<form action="/e/@event.id/start" method="POST" class="form-inline well">
+    <label for="count">Total: <input name="count" id="count" placeholder="300" value=@count></label>
+    <label for="warning">Warn at: <input name="warning" id="warning" placeholder="30" value=@warning></label>
+    <button type="submit" class="btn">Start</button>
+</form>
+<form  action="/e/@event.id/start" method="POST">
+    <input type="hidden" name="warning" value="30">
+    <input type="hidden" name="count" value="300">
+    <button class="btn btn-primary" type=submit>Start 5mins</button>
+</form>
+    <form  action="/e/@event.id/start" method="POST">
+        <input type="hidden" name="warning" value="10">
+        <input type="hidden" name="count" value="60">
+        <button class="btn btn-primary" type=submit>Start 1mins</button>
+    </form>
+    <form  action="/e/@event.id/reset" method="POST">
+        <input type="hidden" name="warning" value="@warning">
+        <input type="hidden" name="count" value="@count">
+        <button class="btn btn-warning" type=submit>Reset</button>
+    </form>
+</div>
+</body>
+</html>
